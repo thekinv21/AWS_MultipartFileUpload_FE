@@ -77,7 +77,6 @@ export function FileUploader() {
 							focusableWhenDisabled
 							className='px-4 cursor-pointer'
 						>
-							{' '}
 							<IconCloudUpload size={19} stroke={1.8} />
 							{isUploading ? 'Uploading…' : 'Upload'}
 						</Button>

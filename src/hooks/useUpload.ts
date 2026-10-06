@@ -1,21 +1,29 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { useMutation } from '@tanstack/react-query'
-import axios, { type AxiosProgressEvent, type AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 
 import { toast } from '@/components/ui/toast'
 
-import { awsService } from '@/services/aws'
 import { errorCatch } from '@/services/instance'
+import { uploadFileInParts } from '@/services/upload'
+
+import type { TCompleteMultipartResponse } from '@/types/upload'
 
 import { UPLOAD_MESSAGES } from '@/constants/UploadMessages'
+import { getTotalSize, toPercent } from '@/lib/FileUtils'
 
-const SINGLE_FILE_FIELD: string = 'file'
-const MULTI_FILE_FIELD: string = 'files'
+type TUseUploadOptions = {
+	/**
+	 * Called as soon as a file is stored, with its S3 key and URL
+	 */
+	onFileUploaded?: (file: File, uploaded: TCompleteMultipartResponse) => void
+}
 
-export function useUpload() {
+export function useUpload({ onFileUploaded }: TUseUploadOptions = {}) {
 	const [progress, setProgress] = useState<number>(0)
 	const controllerRef = useRef<AbortController | null>(null)
+	const uploadedCountRef = useRef<number>(0)
 	const isMountedRef = useRef<boolean>(true)
 
 	/**
@@ -35,23 +43,27 @@ export function useUpload() {
 		mutationFn: async (files: File[]) => {
 			const controller = new AbortController()
 			controllerRef.current = controller
+			uploadedCountRef.current = 0
 			setProgress(0)
 
-			const config: AxiosRequestConfig = {
-				signal: controller.signal,
-				onUploadProgress: ({ loaded, total }: AxiosProgressEvent) =>
-					setProgress(total ? Math.round((loaded / total) * 100) : 0),
+			/**
+			 * Files go one after another; progress covers the bytes of all of them
+			 */
+
+			const totalBytes = getTotalSize(files)
+			let completedBytes = 0
+
+			for (const file of files) {
+				const uploaded = await uploadFileInParts(file, {
+					signal: controller.signal,
+					onProgress: loadedBytes =>
+						setProgress(toPercent(completedBytes + loadedBytes, totalBytes)),
+				})
+
+				completedBytes += file.size
+				uploadedCountRef.current++
+				onFileUploaded?.(file, uploaded)
 			}
-
-			const isSingle = files.length === 1
-			const formData = new FormData()
-			files.forEach(file =>
-				formData.append(isSingle ? SINGLE_FILE_FIELD : MULTI_FILE_FIELD, file),
-			)
-
-			return isSingle
-				? awsService.singleUpload(formData, config)
-				: awsService.multiUpload(formData, config)
 		},
 		onSuccess: (_data, files) => {
 			toast.add({
@@ -60,7 +72,20 @@ export function useUpload() {
 				description: UPLOAD_MESSAGES.uploadSuccess.description(files.length),
 			})
 		},
-		onError: error => {
+		onError: (error, files) => {
+			/**
+			 * Files stored before the stop are already off the list; say so
+			 */
+
+			const uploadedCount = uploadedCountRef.current
+			const partialNote =
+				uploadedCount > 0
+					? UPLOAD_MESSAGES.uploadPartial.description(
+							uploadedCount,
+							files.length,
+						)
+					: undefined
+
 			if (axios.isCancel(error)) {
 				/**
 				 * Leaving the page is not a user cancel, so stay quiet
@@ -70,6 +95,7 @@ export function useUpload() {
 					toast.add({
 						type: 'info',
 						title: UPLOAD_MESSAGES.uploadCancelled.title,
+						description: partialNote,
 					})
 				}
 				return
@@ -78,7 +104,12 @@ export function useUpload() {
 			toast.add({
 				type: 'error',
 				title: UPLOAD_MESSAGES.uploadFailed.title,
-				description: errorCatch(error, UPLOAD_MESSAGES.uploadFailed.fallback),
+				description: [
+					errorCatch(error, UPLOAD_MESSAGES.uploadFailed.fallback),
+					partialNote,
+				]
+					.filter(Boolean)
+					.join(' '),
 			})
 		},
 		onSettled: () => {

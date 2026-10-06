@@ -4,7 +4,6 @@ import {
 	ALLOWED_FILE_TYPES,
 	MAX_FILE_SIZE_BYTES,
 	MAX_FILES_PER_REQUEST,
-	MAX_TOTAL_UPLOAD_SIZE_BYTES,
 } from '@/constants/FileConstant'
 import { formatBytes, getTotalSize } from '@/lib/FileUtils'
 
@@ -21,8 +20,7 @@ export function AllowedFilesHint({ files }: TAllowedFilesHintProps) {
 		return (
 			<p className='text-xs text-muted-foreground tabular-nums'>
 				{files.length} of {MAX_FILES_PER_REQUEST} files,{' '}
-				{formatBytes(getTotalSize(files))} of{' '}
-				{formatBytes(MAX_TOTAL_UPLOAD_SIZE_BYTES)}
+				{formatBytes(getTotalSize(files))} in total
 			</p>
 		)
 	}
@@ -43,8 +41,7 @@ export function AllowedFilesHint({ files }: TAllowedFilesHintProps) {
 			</ul>
 			<p className='text-xs text-muted-foreground'>
 				Up to {formatBytes(MAX_FILE_SIZE_BYTES)} per file,{' '}
-				{MAX_FILES_PER_REQUEST} files max,{' '}
-				{formatBytes(MAX_TOTAL_UPLOAD_SIZE_BYTES)} in total
+				{MAX_FILES_PER_REQUEST} files max
 			</p>
 		</div>
 	)

@@ -29,8 +29,6 @@ export const useFileUploader = () => {
 	})
 
 	const files = useWatch({ control: form.control, name: 'files' })
-	const upload = useUpload()
-	const isUploading: boolean = upload.isPending
 
 	const filesRef = useRef<TSelectedFile[]>(files)
 
@@ -43,6 +41,17 @@ export const useFileUploader = () => {
 	const setFiles = (next: TSelectedFile[]) => {
 		form.setValue('files', next, { shouldDirty: true })
 	}
+
+	const removeFiles = (shouldRemove: (item: TSelectedFile) => boolean) => {
+		const current = form.getValues('files')
+		releaseSelectedFiles(current.filter(shouldRemove))
+		setFiles(current.filter(item => !shouldRemove(item)))
+	}
+
+	const upload = useUpload({
+		onFileUploaded: file => removeFiles(item => item.file === file),
+	})
+	const isUploading: boolean = upload.isPending
 
 	const handleFilesAdded = (incoming: File[]) => {
 		const current = form.getValues('files')
@@ -64,27 +73,10 @@ export const useFileUploader = () => {
 		}
 	}
 
-	const handleRemove = (id: string) => {
-		const current = form.getValues('files')
-		releaseSelectedFiles(current.filter(item => item.id === id))
-		setFiles(current.filter(item => item.id !== id))
-	}
-
-	/**
-	 *
-	 * @param values
-	 */
+	const handleRemove = (id: string) => removeFiles(item => item.id === id)
 
 	const onSubmit = (values: FileUploadFormValues) => {
-		upload.mutate(
-			values.files.map((item: TSelectedFile) => item.file),
-			{
-				onSuccess: () => {
-					releaseSelectedFiles(form.getValues('files'))
-					setFiles([])
-				},
-			},
-		)
+		upload.mutate(values.files.map(item => item.file))
 	}
 
 	return {

@@ -3,7 +3,6 @@ import {
 	MAX_FILE_NAME_LENGTH,
 	MAX_FILE_SIZE_BYTES,
 	MAX_FILES_PER_REQUEST,
-	MAX_TOTAL_UPLOAD_SIZE_BYTES,
 } from '@/constants/FileConstant'
 
 const IMAGE_EXTENSIONS = new Set([
@@ -24,7 +23,6 @@ export type UploadRejectionReason =
 	| 'fileTooLarge'
 	| 'duplicate'
 	| 'tooManyFiles'
-	| 'totalTooLarge'
 
 export type TSelectedFile = {
 	id: string
@@ -67,23 +65,44 @@ export function getTotalSize(files: File[]) {
 	return files.reduce((total, file) => total + file.size, 0)
 }
 
+/**
+ * Splits a file into `chunkSize` slices; an empty file stays one empty slice
+ */
+
+export function splitIntoChunks(file: File, chunkSize: number) {
+	const chunks: Blob[] = []
+
+	for (let start = 0; start < file.size; start += chunkSize) {
+		chunks.push(file.slice(start, start + chunkSize))
+	}
+
+	return chunks.length > 0 ? chunks : [file]
+}
+
+/**
+ * The MIME type sent to the backend as `contentType`, without parameters
+ */
+
+export function getMimeType(file: File) {
+	return file.type.split(';')[0].trim().toLowerCase()
+}
+
 function isAllowedType(file: File) {
 	const extension = getFileExtension(file.name)
 	if (!Object.hasOwn(ALLOWED_FILE_TYPES, extension)) return false
 
 	/**
-	 *  The backend checks the exact MIME type, and an empty one reaches it as
-	 *
-	 * application/octet-stream, so both sides must agree on the type	*
+	 * The backend checks the exact MIME type against the extension, so both
+	 * sides must agree on the type
 	 */
-	const mimeType = file.type.split(';')[0].trim().toLowerCase()
-	return ALLOWED_FILE_TYPES[extension].includes(mimeType)
+	return ALLOWED_FILE_TYPES[extension].includes(getMimeType(file))
 }
 
 /**
  * The `accept` map for react-dropzone, so the file picker only offers allowed
  * types.
  */
+
 export function getDropzoneAccept() {
 	const accept: Record<string, string[]> = {}
 
@@ -98,7 +117,7 @@ export function getDropzoneAccept() {
 
 /**
  * The only validator for incoming files. Rules run per file in a fixed order
- * and the first failure wins: name length, type, size, duplicate, count, total size.
+ * and the first failure wins: name length, type, size, duplicate, count.
  */
 
 export function validateIncomingFiles(current: File[], incoming: File[]) {
@@ -107,7 +126,6 @@ export function validateIncomingFiles(current: File[], incoming: File[]) {
 
 	const seenKeys = new Set(current.map(getFileKey))
 	let count = current.length
-	let totalSize = getTotalSize(current)
 
 	for (const file of incoming) {
 		const reject = (reason: UploadRejectionReason) =>
@@ -139,14 +157,8 @@ export function validateIncomingFiles(current: File[], incoming: File[]) {
 			continue
 		}
 
-		if (totalSize + file.size > MAX_TOTAL_UPLOAD_SIZE_BYTES) {
-			reject('totalTooLarge')
-			continue
-		}
-
 		seenKeys.add(key)
 		count++
-		totalSize += file.size
 		accepted.push(file)
 	}
 
@@ -165,4 +177,8 @@ export function releaseSelectedFiles(files: TSelectedFile[]) {
 	for (const { previewUrl } of files) {
 		if (previewUrl) URL.revokeObjectURL(previewUrl)
 	}
+}
+
+export function toPercent(loaded: number, total: number) {
+	return total > 0 ? Math.round((loaded / total) * 100) : 0
 }

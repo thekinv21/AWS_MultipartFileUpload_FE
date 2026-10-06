@@ -1,7 +1,5 @@
 export const MAX_FILE_SIZE_BYTES: number = 1024 * 1024 * 1024
 
-export const MAX_TOTAL_UPLOAD_SIZE_BYTES: number = 1024 * 1024 * 1024
-
 export const MAX_FILES_PER_REQUEST: number = 10
 
 export const MAX_FILE_NAME_LENGTH: number = 255

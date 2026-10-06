@@ -4,7 +4,6 @@ import {
 	MAX_FILE_NAME_LENGTH,
 	MAX_FILE_SIZE_BYTES,
 	MAX_FILES_PER_REQUEST,
-	MAX_TOTAL_UPLOAD_SIZE_BYTES,
 } from './FileConstant'
 
 const TOAST_NAME_MAX_LENGTH: number = 40
@@ -53,11 +52,6 @@ export const REJECTION_MESSAGES: Record<
 		description: (name: string) =>
 			`"${shortName(name)}" was not added: you can upload up to ${MAX_FILES_PER_REQUEST} files.`,
 	},
-	totalTooLarge: {
-		title: 'Total size too large',
-		description: (name: string) =>
-			`"${shortName(name)}" was not added: total size cannot exceed ${formatBytes(MAX_TOTAL_UPLOAD_SIZE_BYTES)}.`,
-	},
 }
 
 export const UPLOAD_MESSAGES = {
@@ -72,5 +66,9 @@ export const UPLOAD_MESSAGES = {
 	},
 	uploadCancelled: {
 		title: 'Cancelled',
+	},
+	uploadPartial: {
+		description: (uploaded: number, total: number) =>
+			`${uploaded} of ${total} files were uploaded before it stopped.`,
 	},
 } as const

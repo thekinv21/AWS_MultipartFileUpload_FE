@@ -13,3 +13,15 @@ export function errorCatch(
 	}
 	return fallback
 }
+
+/**
+ * Network drops, throttling and server errors are worth another try; a cancel
+ * or a rejected request is not
+ */
+
+export function isRetryableRequestError(error: unknown) {
+	if (axios.isCancel(error) || !axios.isAxiosError(error)) return false
+
+	const status = error.response?.status
+	return status === undefined || status === 429 || status >= 500
+}

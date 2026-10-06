@@ -23,12 +23,6 @@ export function FileDropzone(props: TFileDropzoneProps) {
 	const hintId = useId()
 
 	const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
-		/**
-		 * ejected drops still go through our validator so the user gets a reason
-		 * @param acceptedFiles
-		 * @param fileRejections
-		 * @returns
-		 */
 		onDrop: (acceptedFiles, fileRejections) =>
 			onFilesAdded([
 				...acceptedFiles,
