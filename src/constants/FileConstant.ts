@@ -15,7 +15,7 @@ export const ALLOWED_FILE_TYPES: Record<string, readonly string[]> = {
 	txt: ['text/plain'],
 	xls: ['application/vnd.ms-excel'],
 	xlsx: ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-	csv: ['text/csv'],
+	csv: ['text/csv', 'application/vnd.ms-excel'],
 	jpg: ['image/jpeg'],
 	jpeg: ['image/jpeg'],
 	png: ['image/png'],
@@ -24,6 +24,3 @@ export const ALLOWED_FILE_TYPES: Record<string, readonly string[]> = {
 	bmp: ['image/bmp'],
 	ico: ['image/x-icon', 'image/vnd.microsoft.icon'],
 }
-
-export const ALLOWED_MIME_TYPES: string[] =
-	Object.values(ALLOWED_FILE_TYPES).flat()
