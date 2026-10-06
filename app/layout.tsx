@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 
-import { ColorSchemeScript, mantineHtmlProps } from '@mantine/core'
-import '@mantine/core/styles.css'
-
 import { Providers } from '@/providers'
 
 import './globals.css'
@@ -19,20 +16,16 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-	title: 'React Dropzone file upload',
-	description: 'Example how to upload file',
+	title: 'Upload files',
+	description: 'Drag and drop files to upload them to S3',
 }
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
 	return (
 		<html
 			lang='en'
-			{...mantineHtmlProps}
 			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 		>
-			<head>
-				<ColorSchemeScript defaultColorScheme='auto' />
-			</head>
 			<body className='min-h-full flex flex-col'>
 				<Providers>{children}</Providers>
 			</body>
