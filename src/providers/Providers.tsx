@@ -2,13 +2,10 @@
 
 import { type ReactNode, useState } from 'react'
 
-import { createTheme, MantineProvider } from '@mantine/core'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Provider as JotaiProvider } from 'jotai'
 
-const theme = createTheme({
-	primaryColor: 'blue',
-})
+import { Toaster } from '@/components/ui/toast'
 
 export function Providers({ children }: { children: ReactNode }) {
 	const [queryClient] = useState(
@@ -23,9 +20,8 @@ export function Providers({ children }: { children: ReactNode }) {
 	return (
 		<JotaiProvider>
 			<QueryClientProvider client={queryClient}>
-				<MantineProvider theme={theme} defaultColorScheme='auto'>
-					{children}
-				</MantineProvider>
+				<Toaster />
+				{children}
 			</QueryClientProvider>
 		</JotaiProvider>
 	)
