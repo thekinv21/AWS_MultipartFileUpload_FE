@@ -1,8 +1,10 @@
-export const MAX_FILE_SIZE_BYTES: number = 1024 * 1024 * 1024
+import { env } from '@/config'
 
-export const MAX_FILES_PER_REQUEST: number = 10
+export const MAX_FILE_SIZE_BYTES: number = env.NEXT_PUBLIC_FILE_MAX_SIZE_BYTES
 
-export const MAX_FILE_NAME_LENGTH: number = 255
+export const MAX_FILES_PER_REQUEST: number = env.NEXT_PUBLIC_FILE_MAX_COUNT
+
+export const MAX_FILE_NAME_LENGTH: number = env.NEXT_PUBLIC_FILE_MAX_NAME_LENGTH
 
 export const ALLOWED_FILE_TYPES: Record<string, readonly string[]> = {
 	pdf: ['application/pdf'],
