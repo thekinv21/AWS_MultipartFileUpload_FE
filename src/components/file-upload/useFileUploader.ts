@@ -1,0 +1,99 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm, useWatch } from 'react-hook-form'
+
+import { toast } from '@/components/ui/toast'
+
+import { useUpload } from '@/hooks/useUpload'
+
+import { REJECTION_MESSAGES } from '@/constants/UploadMessages'
+import {
+	createSelectedFile,
+	releaseSelectedFiles,
+	type TSelectedFile,
+	validateIncomingFiles,
+} from '@/lib/FileUtils'
+
+import {
+	fileUploadFormSchema,
+	type FileUploadFormValues,
+} from './FileUploadSchema'
+
+export const useFileUploader = () => {
+	const form = useForm<FileUploadFormValues>({
+		resolver: zodResolver(fileUploadFormSchema),
+		defaultValues: { files: [] },
+	})
+
+	const files = useWatch({ control: form.control, name: 'files' })
+	const upload = useUpload()
+	const isUploading: boolean = upload.isPending
+
+	const filesRef = useRef<TSelectedFile[]>(files)
+
+	useEffect(() => {
+		filesRef.current = files
+	}, [files])
+
+	useEffect(() => () => releaseSelectedFiles(filesRef.current), [])
+
+	const setFiles = (next: TSelectedFile[]) => {
+		form.setValue('files', next, { shouldDirty: true })
+	}
+
+	const handleFilesAdded = (incoming: File[]) => {
+		const current = form.getValues('files')
+		const { accepted, rejections } = validateIncomingFiles(
+			current.map(item => item.file),
+			incoming,
+		)
+
+		rejections.forEach(({ file, reason }) =>
+			toast.add({
+				type: 'error',
+				title: REJECTION_MESSAGES[reason].title,
+				description: REJECTION_MESSAGES[reason].description(file.name),
+			}),
+		)
+
+		if (accepted.length > 0) {
+			setFiles([...current, ...accepted.map(createSelectedFile)])
+		}
+	}
+
+	const handleRemove = (id: string) => {
+		const current = form.getValues('files')
+		releaseSelectedFiles(current.filter(item => item.id === id))
+		setFiles(current.filter(item => item.id !== id))
+	}
+
+	/**
+	 *
+	 * @param values
+	 */
+
+	const onSubmit = (values: FileUploadFormValues) => {
+		upload.mutate(
+			values.files.map((item: TSelectedFile) => item.file),
+			{
+				onSuccess: () => {
+					releaseSelectedFiles(form.getValues('files'))
+					setFiles([])
+				},
+			},
+		)
+	}
+
+	return {
+		form,
+		onSubmit,
+		handleFilesAdded,
+		isUploading,
+		files,
+		upload,
+		handleRemove,
+	}
+}
