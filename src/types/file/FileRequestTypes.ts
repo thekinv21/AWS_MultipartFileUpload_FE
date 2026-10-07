@@ -8,20 +8,20 @@ export type TCompletedPart = {
 	ETag: string
 }
 
-export type TInitiateMultipartRequest = {
+export type TInitiateMultipartUploadRequest = {
 	fileName: string
 	contentType: string
 }
 
-export type TGetPartUrlRequest = TMultipartUploadTarget & {
+export type TGetPresignedPartUrlRequest = TMultipartUploadTarget & {
 	partNumber: number
 }
 
-export type TCompleteMultipartRequest = TMultipartUploadTarget & {
+export type TCompleteMultipartUploadRequest = TMultipartUploadTarget & {
 	parts: TCompletedPart[]
 }
 
-export type TAbortMultipartRequest = TMultipartUploadTarget
+export type TAbortMultipartUploadRequest = TMultipartUploadTarget
 
 export type TUploadFileInPartsOptions = {
 	signal: AbortSignal

@@ -1,14 +1,14 @@
 import type {
 	TCompletedPart,
-	TCompleteMultipartResponse,
+	TCompleteMultipartUploadResponse,
 	TUploadFileInPartsOptions,
-} from '@/types/upload'
+} from '@/types/file'
 
 import { getMimeType, splitIntoChunks } from '@/lib/FileUtils'
 import { mapWithConcurrency, withRetry } from '@/lib/PromiseUtils'
 
 import { isRetryableRequestError } from '../instance'
-import { uploadService } from './UploadService'
+import { fileService } from './FileService'
 
 const PART_CONCURRENCY: number = 4
 
@@ -29,11 +29,12 @@ const PART_RETRY_BASE_DELAY_MS: number = 1000
 export async function uploadFileInParts(
 	file: File,
 	{ signal, onProgress }: TUploadFileInPartsOptions,
-): Promise<TCompleteMultipartResponse> {
-	const { key, uploadId, chunkSize } = await uploadService.initiateMultipart({
-		fileName: file.name,
-		contentType: getMimeType(file),
-	})
+): Promise<TCompleteMultipartUploadResponse> {
+	const { key, uploadId, chunkSize } =
+		await fileService.initiateMultipartUpload({
+			fileName: file.name,
+			contentType: getMimeType(file),
+		})
 	const target = { key, uploadId }
 
 	/**
@@ -58,14 +59,14 @@ export async function uploadFileInParts(
 	const uploadPart = async (chunk: Blob, index: number) => {
 		const partNumber = index + 1
 
-		const url = await uploadService.getPartUrl(
+		const url = await fileService.getPresignedPartUrl(
 			{ ...target, partNumber },
 			{ signal: partSignal },
 		)
 
 		reportProgress(index, 0)
 
-		const etag = await uploadService.uploadPart(url, chunk, {
+		const etag = await fileService.uploadPart(url, chunk, {
 			signal: partSignal,
 			onUploadProgress: ({ loaded }) => reportProgress(index, loaded),
 		})
@@ -87,10 +88,10 @@ export async function uploadFileInParts(
 				}),
 		)
 
-		return await uploadService.completeMultipart({ ...target, parts })
+		return await fileService.completeMultipartUpload({ ...target, parts })
 	} catch (error) {
 		stopParts()
-		void uploadService.abortMultipart(target).catch(() => undefined)
+		void fileService.abortMultipartUpload(target).catch(() => undefined)
 		throw error
 	} finally {
 		signal.removeEventListener('abort', stopParts)

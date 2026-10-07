@@ -5,19 +5,22 @@ import axios from 'axios'
 
 import { toast } from '@/components/ui/toast'
 
+import { uploadFileInParts } from '@/services/file'
 import { errorCatch } from '@/services/instance'
-import { uploadFileInParts } from '@/services/upload'
 
-import type { TCompleteMultipartResponse } from '@/types/upload'
+import type { TCompleteMultipartUploadResponse } from '@/types/file'
 
 import { UPLOAD_MESSAGES } from '@/constants/UploadMessages'
 import { getTotalSize, toPercent } from '@/lib/FileUtils'
 
 type TUseUploadOptions = {
 	/**
-	 * Called as soon as a file is stored, with its S3 key and URL
+	 * Called as soon as a file is stored, with its S3 key
 	 */
-	onFileUploaded?: (file: File, uploaded: TCompleteMultipartResponse) => void
+	onFileUploaded?: (
+		file: File,
+		uploaded: TCompleteMultipartUploadResponse,
+	) => void
 }
 
 export function useUpload({ onFileUploaded }: TUseUploadOptions = {}) {
