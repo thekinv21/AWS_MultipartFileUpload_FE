@@ -45,7 +45,11 @@ export function FileUploader() {
 				</CardHeader>
 
 				<CardContent className='flex flex-col gap-4'>
-					<FileDropzone onFilesAdded={handleFilesAdded} disabled={isUploading}>
+					<FileDropzone
+						onFilesAdded={handleFilesAdded}
+						disabled={isUploading}
+						compact={files.length > 0}
+					>
 						<AllowedFilesHint files={files.map(item => item.file)} />
 					</FileDropzone>
 
