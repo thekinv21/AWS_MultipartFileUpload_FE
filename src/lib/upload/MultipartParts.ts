@@ -1,9 +1,9 @@
+import { fileService } from '@/services/file'
+import { isRetryableRequestError } from '@/services/instance'
+
 import type { TCompletedPart, TUploadPartsOptions } from '@/types/file'
 
 import { mapWithConcurrency, withRetry } from '@/lib/PromiseUtils'
-
-import { isRetryableRequestError } from '../instance'
-import { fileService } from './FileService'
 
 const PART_CONCURRENCY: number = 4
 
@@ -53,5 +53,21 @@ async function uploadPart(
 
 	onPartProgress(index, chunk.size)
 
-	return { PartNumber: partNumber, ETag: etag }
+	return { PartNumber: partNumber, ETag: assertEtag(etag) }
+}
+
+/**
+ * A missing ETag is a setup problem, not something the user can fix: log the
+ * hint for the developer and let the user see the generic failure message
+ */
+
+function assertEtag(etag: unknown) {
+	if (typeof etag !== 'string' || !etag) {
+		console.error(
+			'S3 did not expose the ETag header. Add "ETag" to the bucket CORS ExposeHeaders.',
+		)
+		throw new Error('Missing ETag in the S3 part upload response')
+	}
+
+	return etag
 }

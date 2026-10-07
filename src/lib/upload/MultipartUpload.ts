@@ -1,3 +1,5 @@
+import { fileService } from '@/services/file'
+
 import type {
 	TCompleteMultipartUploadResponse,
 	TMultipartUploadTarget,
@@ -8,7 +10,6 @@ import { createLinkedAbortController } from '@/lib/AbortUtils'
 import { getMimeType, splitIntoChunks } from '@/lib/FileUtils'
 import { createProgressTracker } from '@/lib/ProgressUtils'
 
-import { fileService } from './FileService'
 import { uploadParts } from './MultipartParts'
 
 /**

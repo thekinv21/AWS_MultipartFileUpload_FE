@@ -3,10 +3,9 @@ import { useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 
-import { uploadFiles } from '@/services/file'
-
 import type { TCompleteMultipartUploadResponse } from '@/types/file'
 
+import { uploadFiles } from '@/lib/upload'
 import {
 	getPartialUploadNote,
 	notifyUploadCancelled,
