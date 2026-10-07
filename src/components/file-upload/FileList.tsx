@@ -7,10 +7,16 @@ import { FileListItem } from './FileListItem'
 type TFileListProps = {
 	files: TSelectedFile[]
 	onRemove: (id: string) => void
+	onVisibilityChange: (id: string, isPublic: boolean) => void
 	disabled?: boolean
 }
 
-export function FileList({ files, onRemove, disabled }: TFileListProps) {
+export function FileList({
+	files,
+	onRemove,
+	onVisibilityChange,
+	disabled,
+}: TFileListProps) {
 	return (
 		<ul aria-label='Selected files'>
 			<AnimatePresence initial={false}>
@@ -19,6 +25,7 @@ export function FileList({ files, onRemove, disabled }: TFileListProps) {
 						key={file.id}
 						item={file}
 						onRemove={onRemove}
+						onVisibilityChange={onVisibilityChange}
 						disabled={disabled}
 					/>
 				))}

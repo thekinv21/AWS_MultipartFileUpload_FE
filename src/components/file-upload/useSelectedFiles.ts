@@ -60,5 +60,17 @@ export function useSelectedFiles(form: UseFormReturn<FileUploadFormValues>) {
 		setFiles(current.filter(item => !shouldRemove(item)))
 	}
 
-	return { files, getFiles, addFiles, removeFiles }
+	/**
+	 * @description Sets whether a selected file is uploaded as public or private
+	 * @param id
+	 * @param isPublic
+	 */
+
+	const setFileVisibility = (id: string, isPublic: boolean) => {
+		setFiles(
+			getFiles().map(item => (item.id === id ? { ...item, isPublic } : item)),
+		)
+	}
+
+	return { files, getFiles, addFiles, removeFiles, setFileVisibility }
 }

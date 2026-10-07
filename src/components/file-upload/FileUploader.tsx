@@ -31,6 +31,7 @@ export function FileUploader() {
 		files,
 		upload,
 		handleRemove,
+		handleVisibilityChange,
 	} = useFileUploader()
 
 	return (
@@ -51,6 +52,7 @@ export function FileUploader() {
 					<FileList
 						files={files}
 						onRemove={handleRemove}
+						onVisibilityChange={handleVisibilityChange}
 						disabled={isUploading}
 					/>
 				</CardContent>

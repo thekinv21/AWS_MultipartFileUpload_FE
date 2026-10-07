@@ -1,15 +1,18 @@
 import Image from 'next/image'
 
-import { IconTrash } from '@tabler/icons-react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { IconLock, IconTrash, IconWorld } from '@tabler/icons-react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 
 import {
 	formatBytes,
 	getFileExtension,
 	type TSelectedFile,
 } from '@/lib/FileUtils'
+import { cn } from '@/lib/utils'
 
 import { FileTypeIcon } from './FileTypeIcon'
 
@@ -18,13 +21,20 @@ const EASE_OUT = [0.23, 1, 0.32, 1] as const
 type TFileListItemProps = {
 	item: TSelectedFile
 	onRemove: (id: string) => void
+	onVisibilityChange: (id: string, isPublic: boolean) => void
 	disabled?: boolean
 }
 
-export function FileListItem({ item, onRemove, disabled }: TFileListItemProps) {
+export function FileListItem(props: TFileListItemProps) {
+	const { item, onRemove, onVisibilityChange, disabled } = props
+
 	const shouldReduceMotion = useReducedMotion()
-	const { file, previewUrl } = item
-	const extension = getFileExtension(file.name)
+
+	const { file, previewUrl, isPublic } = item
+
+	const extension: string = getFileExtension(file.name)
+
+	const VisibilityIcon = isPublic ? IconWorld : IconLock
 
 	return (
 		<motion.li
@@ -59,6 +69,55 @@ export function FileListItem({ item, onRemove, disabled }: TFileListItemProps) {
 							{formatBytes(file.size)}, {extension.toUpperCase()}
 						</p>
 					</div>
+
+					<Label
+						title={
+							isPublic
+								? 'Anyone with the link can view this file'
+								: 'Only you can view this file'
+						}
+						className={cn(
+							'shrink-0 cursor-pointer gap-1.5 rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted',
+							isPublic && 'text-foreground',
+							disabled && 'pointer-events-none opacity-50',
+						)}
+					>
+						<span className='relative flex size-4 items-center justify-center'>
+							<AnimatePresence initial={false} mode='popLayout'>
+								<motion.span
+									key={isPublic ? 'public' : 'private'}
+									initial={{ opacity: 0, scale: 0.6 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.6 }}
+									transition={{
+										duration: shouldReduceMotion ? 0 : 0.15,
+										ease: EASE_OUT,
+									}}
+									className='flex'
+								>
+									<VisibilityIcon size={16} stroke={1.8} aria-hidden='true' />
+								</motion.span>
+							</AnimatePresence>
+						</span>
+
+						<span
+							className='hidden grid-cols-1 grid-rows-1 sm:grid'
+							aria-hidden='true'
+						>
+							<span className='invisible col-start-1 row-start-1'>Private</span>
+							<span className='col-start-1 row-start-1'>
+								{isPublic ? 'Public' : 'Private'}
+							</span>
+						</span>
+
+						<Switch
+							size='sm'
+							checked={isPublic}
+							disabled={disabled}
+							onCheckedChange={checked => onVisibilityChange(item.id, checked)}
+							aria-label={`Make ${file.name} public`}
+						/>
+					</Label>
 
 					<Button
 						type='button'

@@ -28,6 +28,7 @@ export type TSelectedFile = {
 	id: string
 	file: File
 	previewUrl?: string
+	isPublic: boolean
 }
 
 export type TFileRejection = {
@@ -210,7 +211,8 @@ export function validateIncomingFiles(current: File[], incoming: File[]) {
 }
 
 /**
- * @description Creates a selected file object with an image preview URL
+ * @description Creates a selected file object with an image preview URL.
+ * Files start as private so nothing is exposed without an explicit choice.
  * @param file
  * @returns Selected file with optional preview URL
  */
@@ -224,6 +226,7 @@ export function createSelectedFile(file: File): TSelectedFile {
 		id: crypto.randomUUID(),
 		file,
 		previewUrl,
+		isPublic: false,
 	}
 }
 

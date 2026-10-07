@@ -20,7 +20,8 @@ export const useFileUploader = () => {
 		defaultValues: { files: [] },
 	})
 
-	const { files, getFiles, addFiles, removeFiles } = useSelectedFiles(form)
+	const { files, getFiles, addFiles, removeFiles, setFileVisibility } =
+		useSelectedFiles(form)
 
 	const upload = useUpload({
 		onFileUploaded: file => removeFiles(item => item.file === file),
@@ -52,6 +53,16 @@ export const useFileUploader = () => {
 	}
 
 	/**
+	 * @description Changes the public/private visibility of a selected file
+	 * @param id
+	 * @param isPublic
+	 */
+
+	const handleVisibilityChange = (id: string, isPublic: boolean) => {
+		setFileVisibility(id, isPublic)
+	}
+
+	/**
 	 * @description Submits the selected files for upload
 	 * @param values
 	 */
@@ -68,5 +79,6 @@ export const useFileUploader = () => {
 		files,
 		upload,
 		handleRemove,
+		handleVisibilityChange,
 	}
 }

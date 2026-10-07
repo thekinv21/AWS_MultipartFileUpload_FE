@@ -4,6 +4,7 @@ const selectedFileSchema = z.object({
 	id: z.string(),
 	file: z.instanceof(File),
 	previewUrl: z.string().optional(),
+	isPublic: z.boolean(),
 })
 
 /**
