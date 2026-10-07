@@ -66,11 +66,11 @@ Large uploads in the browser fail in predictable ways: connections drop, tabs ar
 
 ## Screenshots
 
-|                               Empty state                               |                                  Rejected file                                   |
-| :---------------------------------------------------------------------: | :------------------------------------------------------------------------------: |
-| ![Empty dropzone with the allowed file types](docs/images/fe-empty.png) | ![Notification for a file type that is not allowed](docs/images/fe-rejected.png) |
-|                         **Upload in progress**                          |                               **Upload completed**                               |
-| ![Overall progress bar during an upload](docs/images/fe-uploading.png)  |       ![Success notification after the upload](docs/images/fe-success.png)       |
+|                               Empty state                               |
+| :---------------------------------------------------------------------: |
+| ![Empty dropzone with the allowed file types](docs/images/fe-empty.png) |
+|                         **Upload in progress**                          |
+| ![Overall progress bar during an upload](docs/images/fe-uploading.png)  |
 
 ## Architecture
 
