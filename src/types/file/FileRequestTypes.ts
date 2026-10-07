@@ -22,8 +22,3 @@ export type TCompleteMultipartUploadRequest = TMultipartUploadTarget & {
 }
 
 export type TAbortMultipartUploadRequest = TMultipartUploadTarget
-
-export type TUploadFileInPartsOptions = {
-	signal: AbortSignal
-	onProgress: (loadedBytes: number) => void
-}

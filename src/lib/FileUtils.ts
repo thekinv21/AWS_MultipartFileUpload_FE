@@ -35,18 +35,43 @@ export type TFileRejection = {
 	reason: UploadRejectionReason
 }
 
+/**
+ * @description Gets the file extension from the file name
+ * @param name
+ * @returns File extension without the dot
+ */
+
 export function getFileExtension(name: string) {
 	const dotIndex = name.lastIndexOf('.')
+
 	return dotIndex > 0 ? name.slice(dotIndex + 1).toLowerCase() : ''
 }
+
+/**
+ * @description Creates a unique key for the given file
+ * @param file
+ * @returns Unique file key
+ */
 
 export function getFileKey(file: File) {
 	return `${file.name}:${file.size}:${file.lastModified}`
 }
 
+/**
+ * @description Checks whether the given extension belongs to an image file
+ * @param extension
+ * @returns True if the extension is an image extension
+ */
+
 export function isImageExtension(extension: string) {
 	return IMAGE_EXTENSIONS.has(extension)
 }
+
+/**
+ * @description Formats a byte value into a readable file size
+ * @param bytes
+ * @returns Formatted file size
+ */
 
 export function formatBytes(bytes: number) {
 	let value = bytes
@@ -58,15 +83,25 @@ export function formatBytes(bytes: number) {
 	}
 
 	const rounded = unitIndex === 0 ? value : Math.round(value * 10) / 10
+
 	return `${rounded} ${BYTE_UNITS[unitIndex]}`
 }
+
+/**
+ * @description Calculates the total size of the given files
+ * @param files
+ * @returns Total file size in bytes
+ */
 
 export function getTotalSize(files: File[]) {
 	return files.reduce((total, file) => total + file.size, 0)
 }
 
 /**
- * Splits a file into `chunkSize` slices; an empty file stays one empty slice
+ * @description Splits a file into chunks with the given chunk size
+ * @param file
+ * @param chunkSize
+ * @returns File chunks
  */
 
 export function splitIntoChunks(file: File, chunkSize: number) {
@@ -80,27 +115,32 @@ export function splitIntoChunks(file: File, chunkSize: number) {
 }
 
 /**
- * The MIME type sent to the backend as `contentType`, without parameters
+ * @description Gets the MIME type of a file without parameters
+ * @param file
+ * @returns Normalized MIME type
  */
 
 export function getMimeType(file: File) {
 	return file.type.split(';')[0].trim().toLowerCase()
 }
 
+/**
+ * @description Checks whether the file extension and MIME type are allowed
+ * @param file
+ * @returns True if the file type is allowed
+ */
+
 function isAllowedType(file: File) {
 	const extension = getFileExtension(file.name)
+
 	if (!Object.hasOwn(ALLOWED_FILE_TYPES, extension)) return false
 
-	/**
-	 * The backend checks the exact MIME type against the extension, so both
-	 * sides must agree on the type
-	 */
 	return ALLOWED_FILE_TYPES[extension].includes(getMimeType(file))
 }
 
 /**
- * The `accept` map for react-dropzone, so the file picker only offers allowed
- * types.
+ * @description Creates the accept map for react-dropzone
+ * @returns React Dropzone accept configuration
  */
 
 export function getDropzoneAccept() {
@@ -116,8 +156,10 @@ export function getDropzoneAccept() {
 }
 
 /**
- * The only validator for incoming files. Rules run per file in a fixed order
- * and the first failure wins: name length, type, size, duplicate, count.
+ * @description Validates incoming files against upload rules
+ * @param current
+ * @param incoming
+ * @returns Accepted files and rejected files with their rejection reasons
  */
 
 export function validateIncomingFiles(current: File[], incoming: File[]) {
@@ -128,8 +170,9 @@ export function validateIncomingFiles(current: File[], incoming: File[]) {
 	let count = current.length
 
 	for (const file of incoming) {
-		const reject = (reason: UploadRejectionReason) =>
+		const reject = (reason: UploadRejectionReason) => {
 			rejections.push({ file, reason })
+		}
 
 		if (file.name.length > MAX_FILE_NAME_LENGTH) {
 			reject('nameTooLong')
@@ -147,6 +190,7 @@ export function validateIncomingFiles(current: File[], incoming: File[]) {
 		}
 
 		const key = getFileKey(file)
+
 		if (seenKeys.has(key)) {
 			reject('duplicate')
 			continue
@@ -165,20 +209,31 @@ export function validateIncomingFiles(current: File[], incoming: File[]) {
 	return { accepted, rejections }
 }
 
+/**
+ * @description Creates a selected file object with an image preview URL
+ * @param file
+ * @returns Selected file with optional preview URL
+ */
+
 export function createSelectedFile(file: File): TSelectedFile {
 	const previewUrl = isImageExtension(getFileExtension(file.name))
 		? URL.createObjectURL(file)
 		: undefined
 
-	return { id: crypto.randomUUID(), file, previewUrl }
+	return {
+		id: crypto.randomUUID(),
+		file,
+		previewUrl,
+	}
 }
+
+/**
+ * @description Releases object URLs created for selected files
+ * @param files
+ */
 
 export function releaseSelectedFiles(files: TSelectedFile[]) {
 	for (const { previewUrl } of files) {
 		if (previewUrl) URL.revokeObjectURL(previewUrl)
 	}
-}
-
-export function toPercent(loaded: number, total: number) {
-	return total > 0 ? Math.round((loaded / total) * 100) : 0
 }

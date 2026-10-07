@@ -46,21 +46,7 @@ class FileService {
 
 	async uploadPart(url: string, chunk: Blob, config?: AxiosRequestConfig) {
 		const { headers } = await axios.put(url, chunk, config)
-		const etag = headers.etag
-
-		/**
-		 * A setup problem, not something the user can fix: log the hint for the
-		 * developer and let the user see the generic failure message
-		 */
-
-		if (typeof etag !== 'string' || !etag) {
-			console.error(
-				'S3 did not expose the ETag header. Add "ETag" to the bucket CORS ExposeHeaders.',
-			)
-			throw new Error('Missing ETag in the S3 part upload response')
-		}
-
-		return etag
+		return this.readEtag(headers.etag)
 	}
 
 	async completeMultipartUpload(
@@ -77,6 +63,22 @@ class FileService {
 
 	async abortMultipartUpload(body: TAbortMultipartUploadRequest) {
 		await instance.post(`${this.API_BASE_URL}/multipart/abort`, body)
+	}
+
+	/**
+	 * A missing ETag is a setup problem, not something the user can fix: log the
+	 * hint for the developer and let the user see the generic failure message
+	 */
+
+	private readEtag(etag: unknown) {
+		if (typeof etag !== 'string' || !etag) {
+			console.error(
+				'S3 did not expose the ETag header. Add "ETag" to the bucket CORS ExposeHeaders.',
+			)
+			throw new Error('Missing ETag in the S3 part upload response')
+		}
+
+		return etag
 	}
 }
 
