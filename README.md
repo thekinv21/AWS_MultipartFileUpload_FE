@@ -18,6 +18,10 @@ in parallel and with automatic retries. The backend only signs the requests.
 
 ![Uploader with selected files and public/private toggles](docs/images/fe-selected.png)
 
+## Backend Repository
+
+[Github Repository](https://github.com/thekinv21/AWS_MultipartFileUpload_BE)
+
 ## Overview
 
 This is the client for the [AWS S3 Multipart Upload API](../aws_file_upload). It lets users pick files, decide per file whether it should be public or private, and upload everything in one go with a single progress bar.
