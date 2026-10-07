@@ -1,5 +1,5 @@
-import type { TMultipartUploadTarget } from './FileRequestTypes'
-import type { TCompleteMultipartUploadResponse } from './FileResponseTypes'
+import type { TMultipartUploadTarget } from './MultipartRequestTypes'
+import type { TCompleteMultipartUploadResponse } from './MultipartResponseTypes'
 
 export type TUploadItem = {
 	file: File

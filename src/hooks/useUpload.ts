@@ -6,7 +6,7 @@ import axios from 'axios'
 import type {
 	TCompleteMultipartUploadResponse,
 	TUploadItem,
-} from '@/types/file'
+} from '@/types/multipart'
 
 import { uploadFiles } from '@/lib/upload'
 import {

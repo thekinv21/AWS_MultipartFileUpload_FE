@@ -1,4 +1,4 @@
-import type { TUploadFilesOptions, TUploadItem } from '@/types/file'
+import type { TUploadFilesOptions, TUploadItem } from '@/types/multipart'
 
 import { getTotalSize } from '@/lib/FileUtils'
 import { createProgressTracker, toPercent } from '@/lib/ProgressUtils'

@@ -1,7 +1,7 @@
-import { fileService } from '@/services/file'
 import { isRetryableRequestError } from '@/services/instance'
+import { multipartService } from '@/services/multipart'
 
-import type { TCompletedPart, TUploadPartsOptions } from '@/types/file'
+import type { TCompletedPart, TUploadPartsOptions } from '@/types/multipart'
 
 import { mapWithConcurrency, withRetry } from '@/lib/PromiseUtils'
 
@@ -39,14 +39,14 @@ async function uploadPart(
 ): Promise<TCompletedPart> {
 	const partNumber = index + 1
 
-	const url = await fileService.getPresignedPartUrl(
+	const url = await multipartService.getPresignedPartUrl(
 		{ ...target, partNumber },
 		{ signal },
 	)
 
 	onPartProgress(index, 0)
 
-	const etag = await fileService.uploadPart(url, chunk, {
+	const etag = await multipartService.uploadPart(url, chunk, {
 		signal,
 		onUploadProgress: ({ loaded }) => onPartProgress(index, loaded),
 	})

@@ -1,10 +1,10 @@
-import { fileService } from '@/services/file'
+import { multipartService } from '@/services/multipart'
 
 import type {
 	TCompleteMultipartUploadResponse,
 	TMultipartUploadTarget,
 	TUploadFileInPartsOptions,
-} from '@/types/file'
+} from '@/types/multipart'
 
 import { createLinkedAbortController } from '@/lib/AbortUtils'
 import { getMimeType, splitIntoChunks } from '@/lib/FileUtils'
@@ -43,7 +43,7 @@ export async function uploadFileInParts(
 			onPartProgress: createProgressTracker(chunks.length, onProgress),
 		})
 
-		return await fileService.completeMultipartUpload({ ...target, parts })
+		return await multipartService.completeMultipartUpload({ ...target, parts })
 	} catch (error) {
 		partsController.abort()
 		abortUploadQuietly(target)
@@ -54,7 +54,7 @@ export async function uploadFileInParts(
 }
 
 function initiateUpload(file: File, isPublic: boolean) {
-	return fileService.initiateMultipartUpload({
+	return multipartService.initiateMultipartUpload({
 		fileName: file.name,
 		contentType: getMimeType(file),
 		isPublic,
@@ -67,5 +67,5 @@ function initiateUpload(file: File, isPublic: boolean) {
  */
 
 function abortUploadQuietly(target: TMultipartUploadTarget) {
-	void fileService.abortMultipartUpload(target).catch(() => undefined)
+	void multipartService.abortMultipartUpload(target).catch(() => undefined)
 }

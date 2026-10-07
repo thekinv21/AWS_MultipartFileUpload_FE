@@ -10,19 +10,19 @@ import type {
 	TGetPresignedPartUrlResponse,
 	TInitiateMultipartUploadRequest,
 	TInitiateMultipartUploadResponse,
-} from '@/types/file'
+} from '@/types/multipart'
 
 import { instance } from '../instance'
 
-class FileService {
-	private readonly API_BASE_URL = '/v1/files'
+class MultipartService {
+	private readonly API_BASE_URL = '/v1/multipart'
 
 	async initiateMultipartUpload(
 		body: TInitiateMultipartUploadRequest,
 		config?: AxiosRequestConfig,
 	) {
 		const { data } = await instance.post<TInitiateMultipartUploadResponse>(
-			`${this.API_BASE_URL}/multipart`,
+			`${this.API_BASE_URL}/initiate`,
 			body,
 			config,
 		)
@@ -36,7 +36,7 @@ class FileService {
 		const {
 			data: { url },
 		} = await instance.post<TGetPresignedPartUrlResponse>(
-			`${this.API_BASE_URL}/multipart/part-url`,
+			`${this.API_BASE_URL}/part-url`,
 			body,
 			config,
 		)
@@ -60,7 +60,7 @@ class FileService {
 		config?: AxiosRequestConfig,
 	) {
 		const { data } = await instance.post<TCompleteMultipartUploadResponse>(
-			`${this.API_BASE_URL}/multipart/complete`,
+			`${this.API_BASE_URL}/complete`,
 			body,
 			config,
 		)
@@ -68,7 +68,7 @@ class FileService {
 	}
 
 	async abortMultipartUpload(body: TAbortMultipartUploadRequest) {
-		await instance.post(`${this.API_BASE_URL}/multipart/abort`, body)
+		await instance.post(`${this.API_BASE_URL}/abort`, body)
 	}
 
 	/**
@@ -90,4 +90,4 @@ class FileService {
 	}
 }
 
-export const fileService = new FileService()
+export const multipartService = new MultipartService()
