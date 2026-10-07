@@ -1,6 +1,11 @@
 import type { TMultipartUploadTarget } from './FileRequestTypes'
 import type { TCompleteMultipartUploadResponse } from './FileResponseTypes'
 
+export type TUploadItem = {
+	file: File
+	isPublic: boolean
+}
+
 export type TUploadFilesOptions = {
 	signal: AbortSignal
 	/**
@@ -14,6 +19,7 @@ export type TUploadFilesOptions = {
 }
 
 export type TUploadFileInPartsOptions = {
+	isPublic: boolean
 	signal: AbortSignal
 	onProgress: (loadedBytes: number) => void
 }

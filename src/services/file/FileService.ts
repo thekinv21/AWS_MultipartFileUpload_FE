@@ -4,6 +4,8 @@ import type {
 	TAbortMultipartUploadRequest,
 	TCompleteMultipartUploadRequest,
 	TCompleteMultipartUploadResponse,
+	TGetDownloadUrlRequest,
+	TGetDownloadUrlResponse,
 	TGetPresignedPartUrlRequest,
 	TGetPresignedPartUrlResponse,
 	TInitiateMultipartUploadRequest,
@@ -67,6 +69,24 @@ class FileService {
 
 	async abortMultipartUpload(body: TAbortMultipartUploadRequest) {
 		await instance.post(`${this.API_BASE_URL}/multipart/abort`, body)
+	}
+
+	/**
+	 * Presigned download URL for a stored file, public or private. The file is
+	 * saved under its original name.
+	 */
+
+	async getDownloadUrl(
+		params: TGetDownloadUrlRequest,
+		config?: AxiosRequestConfig,
+	) {
+		const {
+			data: { url },
+		} = await instance.get<TGetDownloadUrlResponse>(
+			`${this.API_BASE_URL}/download-url`,
+			{ ...config, params },
+		)
+		return url
 	}
 }
 

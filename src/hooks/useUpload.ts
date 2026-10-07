@@ -3,7 +3,10 @@ import { useRef, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import axios from 'axios'
 
-import type { TCompleteMultipartUploadResponse } from '@/types/file'
+import type {
+	TCompleteMultipartUploadResponse,
+	TUploadItem,
+} from '@/types/file'
 
 import { uploadFiles } from '@/lib/upload'
 import {
@@ -35,10 +38,10 @@ export function useUpload({ onFileUploaded }: TUseUploadOptions = {}) {
 		onFileUploaded?.(file, uploaded)
 	}
 
-	const handleError = (error: unknown, files: File[]) => {
+	const handleError = (error: unknown, items: TUploadItem[]) => {
 		const partialNote = getPartialUploadNote(
 			uploadedCountRef.current,
-			files.length,
+			items.length,
 		)
 
 		if (!axios.isCancel(error)) {
@@ -57,17 +60,17 @@ export function useUpload({ onFileUploaded }: TUseUploadOptions = {}) {
 
 	const mutation = useMutation({
 		mutationKey: ['files', 'upload'],
-		mutationFn: (files: File[]) => {
+		mutationFn: (items: TUploadItem[]) => {
 			uploadedCountRef.current = 0
 			setProgress(0)
 
-			return uploadFiles(files, {
+			return uploadFiles(items, {
 				signal: abortController.start(),
 				onProgress: setProgress,
 				onFileUploaded: handleFileUploaded,
 			})
 		},
-		onSuccess: (_data, files) => notifyUploadSucceeded(files.length),
+		onSuccess: (_data, items) => notifyUploadSucceeded(items.length),
 		onError: handleError,
 		onSettled: abortController.clear,
 	})

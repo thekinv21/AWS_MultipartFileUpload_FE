@@ -24,9 +24,10 @@ import { uploadParts } from './MultipartParts'
 
 export async function uploadFileInParts(
 	file: File,
-	{ signal, onProgress }: TUploadFileInPartsOptions,
+	{ isPublic, signal, onProgress }: TUploadFileInPartsOptions,
 ): Promise<TCompleteMultipartUploadResponse> {
-	const { chunkSize, ...target } = await initiateUpload(file)
+	const { chunkSize, key, uploadId } = await initiateUpload(file, isPublic)
+	const target: TMultipartUploadTarget = { key, uploadId }
 	const chunks = splitIntoChunks(file, chunkSize)
 
 	/**
@@ -52,10 +53,11 @@ export async function uploadFileInParts(
 	}
 }
 
-function initiateUpload(file: File) {
+function initiateUpload(file: File, isPublic: boolean) {
 	return fileService.initiateMultipartUpload({
 		fileName: file.name,
 		contentType: getMimeType(file),
+		isPublic,
 	})
 }
 

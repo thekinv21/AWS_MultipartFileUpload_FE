@@ -1,4 +1,4 @@
-import type { TUploadFilesOptions } from '@/types/file'
+import type { TUploadFilesOptions, TUploadItem } from '@/types/file'
 
 import { getTotalSize } from '@/lib/FileUtils'
 import { createProgressTracker, toPercent } from '@/lib/ProgressUtils'
@@ -12,17 +12,19 @@ import { uploadFileInParts } from './MultipartUpload'
  */
 
 export async function uploadFiles(
-	files: File[],
+	items: TUploadItem[],
 	{ signal, onProgress, onFileUploaded }: TUploadFilesOptions,
 ) {
+	const files = items.map(item => item.file)
 	const totalBytes = getTotalSize(files)
 
 	const reportFileProgress = createProgressTracker(files.length, loaded =>
 		onProgress(toPercent(loaded, totalBytes)),
 	)
 
-	for (const [index, file] of files.entries()) {
+	for (const [index, { file, isPublic }] of items.entries()) {
 		const uploaded = await uploadFileInParts(file, {
+			isPublic,
 			signal,
 			onProgress: loaded => reportFileProgress(index, loaded),
 		})

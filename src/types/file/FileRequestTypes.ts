@@ -11,6 +11,7 @@ export type TCompletedPart = {
 export type TInitiateMultipartUploadRequest = {
 	fileName: string
 	contentType: string
+	isPublic: boolean
 }
 
 export type TGetPresignedPartUrlRequest = TMultipartUploadTarget & {
@@ -22,3 +23,7 @@ export type TCompleteMultipartUploadRequest = TMultipartUploadTarget & {
 }
 
 export type TAbortMultipartUploadRequest = TMultipartUploadTarget
+
+export type TGetDownloadUrlRequest = {
+	key: string
+}

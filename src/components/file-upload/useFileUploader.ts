@@ -68,7 +68,12 @@ export const useFileUploader = () => {
 	 */
 
 	const onSubmit = (values: FileUploadFormValues) => {
-		upload.mutate(values.files.map(item => item.file))
+		upload.mutate(
+			values.files.map(item => ({
+				file: item.file,
+				isPublic: item.isPublic,
+			})),
+		)
 	}
 
 	return {
